@@ -7,7 +7,9 @@
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
-(new Symfony\Component\Dotenv\Dotenv())->usePutenv()->loadEnv(dirname(__DIR__).'/.env');
+// bootEnv, not loadEnv: it also reads a dumped .env.local.php, which is where
+// the values live when the host was set up with `composer dump-env prod`.
+(new Symfony\Component\Dotenv\Dotenv())->usePutenv()->bootEnv(dirname(__DIR__).'/.env', 'prod');
 
 $expected = $_ENV['DEPLOY_TOKEN'] ?? '';
 $given = $_GET['token'] ?? '';
