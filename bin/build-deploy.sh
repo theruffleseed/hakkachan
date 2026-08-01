@@ -45,9 +45,39 @@ for item in assets bin composer.json composer.lock config .editorconfig .env .gi
 done
 mkdir -p "$tree/var/cache" "$tree/var/log"
 
+# The Tailwind bundle reads this at runtime and throws if it is absent, which
+# takes down every page that extends base.html.twig. It is not optional.
+mkdir -p "$tree/var/tailwind"
+cp "$stage/var/tailwind/app.built.css" "$tree/var/tailwind/app.built.css"
+
 rm -f "$out_zip"
 (cd "$tree" && zip -rqX "$out_zip" .)
 
+# Smoke test the artifact itself, not the working tree: extract it fresh and
+# serve it in prod exactly as the host will. A build that cannot render a page
+# must fail here rather than on the live site.
+verify="$work/verify"
+mkdir -p "$verify"
+unzip -q "$out_zip" -d "$verify"
+# Same step deploy.php runs on the host; also proves the migrations apply to an
+# empty database.
+(cd "$verify" && APP_ENV=prod php bin/console doctrine:migrations:migrate --no-interaction >/dev/null)
+php -S 127.0.0.1:8188 -t "$verify/public_html" "$verify/public_html/index.php" >/dev/null 2>&1 &
+server=$!
+trap 'kill $server 2>/dev/null; rm -rf "$work"' EXIT
+sleep 2
+
+for path in / /reserve /visit /legal/booking-terms /legal/privacy; do
+    body="$(curl -s --max-time 20 -w '\n%{http_code}' "http://127.0.0.1:8188$path")"
+    if [[ "$(tail -1 <<<"$body")" != 200 ]] || grep -q 'An Error Occurred' <<<"$body"; then
+        echo "SMOKE TEST FAILED on $path" >&2
+        grep -oE '<title>[^<]*</title>' <<<"$body" | head -2 >&2
+        exit 1
+    fi
+done
+grep -q 'Phone (Optional)' <<<"$(curl -s http://127.0.0.1:8188/reserve)" \
+    || { echo 'SMOKE TEST FAILED: reservation form fields missing' >&2; exit 1; }
+
 echo "Built $out_zip"
 unzip -p "$out_zip" .env | grep -E '^(APP_ENV|DEFAULT_URI)='
-echo "$(unzip -Z1 "$out_zip" | wc -l) entries"
+echo "$(unzip -Z1 "$out_zip" | wc -l) entries — smoke test passed"
