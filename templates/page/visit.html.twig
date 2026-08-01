@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Visit — Hakkachan{% endblock %}
+{% block meta_description %}Hakkachan is held at Intasek, 11 Jalan Tasek, 58100 Kuala Lumpur.{% endblock %}
+
+{% block body %}
+    <section class="py-24 md:py-32">
+        <div class="max-w-3xl mx-auto px-6 text-center">
+            <p class="brand-mark text-xs text-brass mb-6">Visit</p>
+            <h1 class="text-4xl md:text-5xl font-light mb-10 text-charcoal">Find Us</h1>
+
+            <div class="flex flex-wrap justify-center gap-x-10 gap-y-6 text-left mb-10">
+                <div>
+                    <p class="brand-mark text-xs text-brass mb-2">Address</p>
+                    <p class="text-charcoal/80 leading-relaxed">
+                        <span class="brand-mark">Intasek</span><br>
+                        11 Jalan Tasek<br>
+                        58100 Kuala Lumpur
+                    </p>
+                </div>
+                <div>
+                    <p class="brand-mark text-xs text-brass mb-2">Seating Hours</p>
+                    <p class="text-charcoal/80 leading-relaxed">
+                        Fridays &amp; Saturdays<br>
+                        6:00pm&ndash;8:00pm
+                    </p>
+                </div>
+                <div>
+                    <p class="brand-mark text-xs text-brass mb-2">Drinks</p>
+                    <p class="text-charcoal/80 leading-relaxed">
+                        BYOB welcome<br>
+                        Corkage RM50/bottle<br>
+                        Mixers available
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+                <a href="https://maps.google.com/?q=Intasek,+11+Jalan+Tasek,+58100+Kuala+Lumpur"
+                   target="_blank" rel="noopener noreferrer"
+                   class="inline-block bg-brass text-charcoal px-8 py-3 text-sm brand-mark hover:bg-brass-dim transition-colors">
+                    Get Directions
+                </a>
+                <a href="https://wa.me/60127882550?text=Hi%20Hakkachan%2C%20I%20have%20a%20question%20about%20parking%2Faccess."
+                   class="text-sm text-charcoal/70 hover:text-charcoal transition-colors underline underline-offset-4">
+                    Ask about parking &amp; access
+                </a>
+            </div>
+        </div>
+        <div class="max-w-3xl mx-auto px-6 mt-16">
+            <img src="{{ asset('images/intasek-entrance.jpg') }}" alt="The entrance to Intasek, 11 Jalan Tasek"
+                 width="722" height="1080" loading="lazy"
+                 class="w-full max-h-[36rem] object-cover object-center" />
+        </div>
+    </section>
+{% endblock %}

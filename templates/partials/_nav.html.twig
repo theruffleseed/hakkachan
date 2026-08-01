@@ -1,0 +1,40 @@
+{% set transparent = transparent|default(false) %}
+<header
+    class="{% if transparent %}fixed inset-x-0 top-0 z-50 bg-transparent text-bone border-b border-transparent transition-colors duration-300{% else %}relative bg-bone text-charcoal border-b border-bone-dim{% endif %}"
+    data-controller="{% if transparent %}site-header {% endif %}mobile-nav"
+>
+    <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+        <a href="{{ path('app_home') }}" class="brand-mark text-lg text-current">
+            Hakkachan
+        </a>
+
+        <nav aria-label="Primary" class="hidden md:flex items-center gap-8 text-sm text-current">
+            <a href="{{ path('app_home') }}" class="hover:text-brass transition-colors">Home</a>
+            <a href="{{ path('app_reserve') }}" class="hover:text-brass transition-colors">Reserve</a>
+            <a href="{{ path('app_visit') }}" class="hover:text-brass transition-colors">Visit</a>
+        </nav>
+
+        <a href="{{ path('app_reserve') }}"
+           class="hidden md:inline-block border border-brass text-brass px-5 py-2 text-sm hover:bg-brass hover:text-charcoal transition-colors">
+            Reserve
+        </a>
+
+        <button type="button"
+                data-mobile-nav-target="button"
+                data-action="mobile-nav#toggle"
+                class="md:hidden text-current"
+                aria-expanded="false"
+                aria-controls="mobile-nav-panel"
+                aria-label="Open menu">
+            <span aria-hidden="true">&#9776;</span>
+        </button>
+    </div>
+
+    <nav id="mobile-nav-panel" data-mobile-nav-target="panel" aria-label="Primary" class="hidden md:hidden bg-bone text-charcoal border-t border-bone-dim">
+        <div class="flex flex-col px-6 py-4 gap-4 text-sm">
+            <a href="{{ path('app_home') }}">Home</a>
+            <a href="{{ path('app_reserve') }}">Reserve</a>
+            <a href="{{ path('app_visit') }}">Visit</a>
+        </div>
+    </nav>
+</header>

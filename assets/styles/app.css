@@ -1,3 +1,119 @@
-body {
-    background-color: skyblue;
+@import "tailwindcss";
+
+/*
+ * Self-hosted type. Lora (serif, headings) and Work Sans (humanist sans, body) —
+ * open-license (SIL OFL) families chosen as placeholders for the brand's editorial,
+ * warm-but-restrained register. Swap the files in assets/fonts/ and the @font-face
+ * declarations below if the client specifies different faces.
+ */
+@font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/lora-400.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../fonts/lora-500.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../fonts/lora-600.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('../fonts/lora-700.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Work Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/work-sans-400.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Work Sans';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../fonts/work-sans-500.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Work Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../fonts/work-sans-600.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Work Sans';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('../fonts/work-sans-700.woff2') format('woff2');
+}
+
+@theme {
+    --font-serif: 'Lora', ui-serif, Georgia, serif;
+    --font-sans: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+
+    /* Charcoal / bone / aged brass — trim-only accent, per brand direction */
+    --color-charcoal: #1c1a17;
+    --color-charcoal-soft: #2a2724;
+    --color-bone: #f4efe6;
+    --color-bone-dim: #e8e0d2;
+    --color-brass: #a9824f;
+    --color-brass-dim: #8a6a3d;
+
+    /* WhatsApp's own brand green, for WhatsApp CTAs specifically */
+    --color-whatsapp: #25d366;
+    --color-whatsapp-dim: #1da851;
+}
+
+@layer base {
+    html {
+        font-family: var(--font-sans);
+    }
+
+    body {
+        background-color: var(--color-bone);
+        color: var(--color-charcoal);
+    }
+
+    h1, h2, h3, h4 {
+        font-family: var(--font-serif);
+    }
+
+    /* Respect reduced-motion for any scroll/fade utilities added later */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+@layer components {
+    /*
+     * Brand-mark treatment for "HAKKACHAN" / "INTASEK": letter-spaced caps rather
+     * than literal font small-caps, since the self-hosted faces above don't ship
+     * small-caps glyphs. Uppercase + wide tracking reads as the same register.
+     */
+    .brand-mark {
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-weight: 500;
+    }
 }

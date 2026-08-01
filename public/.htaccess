@@ -1,0 +1,64 @@
+# Use the front controller as index file. It serves as a fallback solution when
+# every other rewrite/redirect fails (e.g. in an aliased environment without
+# mod_rewrite configured).
+DirectoryIndex index.php
+
+# By default, Symfony web-controllers aren't accessible.
+# You can allow access to them in production mode by removing lines matching Block***
+
+# Block access to internal Symfony files, except front controller.
+<FilesMatch "^(?!index)\.php$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Disable Proxy header, see https://httpoxy.org/
+    RequestHeader unset Proxy
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force HTTPS — this host serves plain http:// directly instead of
+    # redirecting, so without this any http:// visit is genuinely unencrypted.
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Determine the RewriteBase automatically and set it as environment variable.
+    RewriteCond %{REQUEST_URI}::$0 ^(/.+)/(.*)::\2$
+    RewriteRule .* - [E=BASE:%1]
+
+    RewriteCond %{HTTP:Authorization} .+
+    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Sets the HTTP_X_FORWARDED_PROTO header from Front-End-Https header
+    RewriteCond %{HTTP:Front-End-Https} on
+    RewriteRule .* - [E=HTTP_X_FORWARDED_PROTO:https]
+
+    # Redirect to URI without front controller to prevent duplicate content
+    # (with and without `/index.php`). Only do this redirect on the initial
+    # rewrite by Apache and not on subsequent cycles. Otherwise we would get an
+    # endless redirect loop (request -> rewrite to front controller ->
+    # redirect -> request -> ...).
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteRule ^index\.php(?:/(.*)|$) %{ENV:BASE}/$1 [R=301,L]
+
+    # If the requested filename exists, simply serve it.
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    RewriteRule ^ %{ENV:BASE}/index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    <IfModule mod_alias.c>
+        RedirectMatch 307 ^/$ /index.php/
+    </IfModule>
+</IfModule>

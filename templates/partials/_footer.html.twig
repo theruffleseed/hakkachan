@@ -1,0 +1,34 @@
+<footer class="bg-charcoal text-bone">
+    <div class="max-w-6xl mx-auto px-6 py-14 grid gap-10 md:grid-cols-3 text-sm">
+        <div>
+            <p class="brand-mark text-base">Hakkachan</p>
+        </div>
+
+        <div>
+            <p class="brand-mark text-xs text-brass mb-3">Visit</p>
+            <ul class="space-y-2 text-bone-dim">
+                <li><a href="{{ path('app_visit') }}" class="hover:text-bone transition-colors">Location &amp; hours</a></li>
+                <li>
+                    <a href="https://wa.me/60127882550?text=Hi%20Hakkachan%2C%20I%27d%20like%20to%20ask%20about%20a%20reservation."
+                       class="hover:text-bone transition-colors">
+                        WhatsApp +60 12 7882 550
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div>
+            <p class="brand-mark text-xs text-brass mb-3">Legal</p>
+            <ul class="space-y-2 text-bone-dim">
+                <li><a href="{{ path('app_legal_privacy') }}" class="hover:text-bone transition-colors">Privacy policy</a></li>
+                <li><a href="{{ path('app_legal_terms') }}" class="hover:text-bone transition-colors">Booking terms</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="border-t border-white/10">
+        <p class="max-w-6xl mx-auto px-6 py-5 text-xs text-bone-dim/70">
+            &copy; {{ "now"|date("Y") }} Hakkachan. All rights reserved.
+        </p>
+    </div>
+</footer>

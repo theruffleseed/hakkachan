@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Privacy Policy — Hakkachan{% endblock %}
+{% block meta_description %}Hakkachan's privacy policy.{% endblock %}
+
+{% block body %}
+    <section class="py-24 md:py-32">
+        <div class="max-w-2xl mx-auto px-6">
+            <p class="brand-mark text-xs text-brass mb-6 text-center">Legal</p>
+            <h1 class="text-4xl md:text-5xl font-light mb-12 text-charcoal text-center">Privacy Policy</h1>
+
+            <div class="space-y-8 text-charcoal/80 leading-relaxed">
+                <p>This policy explains what personal data Hakkachan collects when you make a reservation, in line with Malaysia's Personal Data Protection Act 2010 (PDPA).</p>
+
+                <div>
+                    <h2 class="brand-mark text-sm text-charcoal mb-2">What We Collect</h2>
+                    <p>When you book a seating, we collect your name and email address (via our payment processor, Stripe), along with the reservation date, number of guests, and amount paid.</p>
+                </div>
+                <div>
+                    <h2 class="brand-mark text-sm text-charcoal mb-2">How We Use It</h2>
+                    <p>We use this information only to confirm and manage your reservation, and to contact you about that booking if needed. We do not use it for marketing, and we do not sell or share it with third parties beyond what's needed to process payment.</p>
+                </div>
+                <div>
+                    <h2 class="brand-mark text-sm text-charcoal mb-2">Payment Data</h2>
+                    <p>Payments are processed entirely by <span class="brand-mark">Stripe</span>. We never see or store your card details — Stripe's own privacy policy governs how they handle that information.</p>
+                </div>
+                <div>
+                    <h2 class="brand-mark text-sm text-charcoal mb-2">Your Rights</h2>
+                    <p>Under the PDPA, you may request access to, correction of, or deletion of your personal data held by us. To do so, message us on
+                        <a href="https://wa.me/60127882550" class="underline underline-offset-4 hover:text-charcoal">WhatsApp</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

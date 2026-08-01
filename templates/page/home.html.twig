@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hakkachan — Hakka Dining Residency, Kuala Lumpur{% endblock %}
+{% block meta_description %}Hakkachan is an 18-seat Hakka dining residency in Kuala Lumpur, hosted in collaboration with Intasek. Season One is now seating — Fridays &amp; Saturdays, RM230 per person.{% endblock %}
+
+{% block nav %}
+    {% include 'partials/_nav.html.twig' with { transparent: true } %}
+{% endblock %}
+
+{% block body %}
+    <section class="relative min-h-screen flex items-end bg-charcoal text-bone overflow-hidden">
+        <img src="{{ asset('images/intasek-room.jpg') }}" alt="" width="720" height="1080"
+             class="absolute inset-0 w-full h-full object-cover object-center" />
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/85 to-charcoal/50"></div>
+
+        <div class="relative max-w-6xl mx-auto px-6 pt-40 pb-20 md:pb-28 w-full">
+            <p class="brand-mark text-xs md:text-sm text-brass mb-6">Season One &middot; Now Seating</p>
+            <h1 class="brand-mark text-[clamp(2rem,8vw,4.5rem)] mb-6">Hakkachan</h1>
+            <p class="font-serif text-xl md:text-2xl font-light max-w-xl text-bone-dim leading-relaxed mb-10">
+                A Hakka dining residency in Kuala Lumpur, hosted in collaboration with
+                <span class="brand-mark">Intasek</span>.
+            </p>
+            <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
+                <a href="{{ path('app_reserve') }}"
+                   class="inline-block bg-brass text-charcoal px-8 py-3 text-sm brand-mark hover:bg-brass-dim transition-colors">
+                    Reserve a Seat
+                </a>
+                <div class="text-sm text-bone-dim">
+                    <p>Fridays &amp; Saturdays &middot; 18 seats &middot; RM230 per person</p>
+                    <p class="mt-1"><span class="brand-mark">Intasek</span>, 11 Jalan Tasek, 58100 Kuala Lumpur</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section data-controller="reveal" class="py-24 md:py-32">
+        <div class="max-w-6xl mx-auto px-6 grid gap-12 md:grid-cols-2 md:items-center">
+            <img src="{{ asset('images/intasek-dining-scene.jpg') }}" alt="Guests seated together at Intasek during a Hakkachan evening"
+                 width="1080" height="720" loading="lazy"
+                 class="w-full h-80 md:h-[26rem] object-cover object-center order-first md:order-last" />
+            <div>
+                <p class="brand-mark text-xs text-brass mb-6">Our Story</p>
+                <p class="font-serif text-xl md:text-2xl font-light leading-relaxed text-charcoal mb-6">
+                    <span class="brand-mark">Hakkachan</span> began as a conversation between siblings about the food of our rural Hakka childhood in Malacca and the joyfully refreshed heritage food scene of Kuala Lumpur today.
+                </p>
+                <p class="text-charcoal/70 leading-relaxed">
+                    Created in collaboration with <span class="brand-mark">Intasek</span>, it is an exploration of how Hakka flavours and traditions can find new expression in the city.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section data-controller="reveal" class="py-24 md:py-32 bg-charcoal-soft text-bone">
+        <div class="max-w-6xl mx-auto px-6 grid gap-12 md:grid-cols-2 md:items-center">
+            <div>
+                <p class="brand-mark text-xs text-brass mb-6">Season One</p>
+                <h2 class="text-3xl md:text-4xl font-light mb-6">Seven courses. One evening.</h2>
+                <p class="text-bone-dim leading-relaxed">
+                    Prix fixe menu, no à la carte. BYOB welcome, corkage RM50 per bottle. Mixers available for purchase.
+                </p>
+            </div>
+            <div class="border border-white/10 p-8 md:p-10 text-center">
+                <p class="brand-mark text-xs text-brass mb-4">The Menu</p>
+                <ul class="space-y-3 font-serif text-lg font-light text-bone-dim">
+                    <li>Spiced Beef Suet, Grilled with Pineapple</li>
+                    <li>Char Siew &amp; Pickled Cucumber in Youtiao</li>
+                    <li>Hakka Pasta with Minced Pork &amp; Wild Fungi</li>
+                    <li>Cabbage Wallets with Hakka Meat Paste</li>
+                    <li>Pasture-Raised Chicken, Tipsy Hakka Style</li>
+                    <li>Slow Roasted Pork Collar with Sun-Dried Bokchoy</li>
+                    <li>Bubur Cha Cha</li>
+                </ul>
+                <p class="text-sm text-bone-dim/60 mt-6">Served in no particular order &mdash; dessert always last.</p>
+            </div>
+        </div>
+    </section>
+
+    <section data-controller="reveal" class="py-24 md:py-32">
+        <div class="max-w-3xl mx-auto px-6 text-center">
+            <p class="brand-mark text-xs text-brass mb-6">Upcoming Dates</p>
+            <h2 class="text-3xl md:text-4xl font-light mb-6 text-charcoal">Reserve your evening</h2>
+            <p class="text-charcoal/70 leading-relaxed mb-10">
+                Service dates and live seat counts will appear here once the season calendar is connected. In the meantime, WhatsApp us to check availability, or start a reservation below.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+                <a href="{{ path('app_reserve') }}"
+                   class="inline-block border border-charcoal px-8 py-3 text-sm brand-mark hover:bg-charcoal hover:text-bone transition-colors">
+                    Reserve a Seat
+                </a>
+                <a href="https://wa.me/60127882550?text=Hi%20Hakkachan%2C%20I%27d%20like%20to%20ask%20about%20seats%20for%20an%20upcoming%20evening."
+                   class="text-sm text-charcoal/70 hover:text-charcoal transition-colors underline underline-offset-4">
+                    Message us on WhatsApp
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section data-controller="reveal" class="py-16 md:py-20 bg-bone-dim">
+        <div class="max-w-4xl mx-auto px-6">
+            <p class="text-sm text-charcoal/80 text-center">
+                <span class="brand-mark">Intasek</span>, 11 Jalan Tasek, 58100 Kuala Lumpur
+            </p>
+        </div>
+    </section>
+{% endblock %}

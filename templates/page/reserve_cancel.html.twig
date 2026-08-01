@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Booking Cancelled — Hakkachan{% endblock %}
+
+{% block body %}
+    <section class="py-24 md:py-32">
+        <div class="max-w-md mx-auto px-6 text-center">
+            <p class="brand-mark text-xs text-brass mb-6">Cancelled</p>
+            <h1 class="text-4xl md:text-5xl font-light mb-6 text-charcoal">No Payment Made</h1>
+            <p class="text-charcoal/70 leading-relaxed mb-10">
+                Your booking was cancelled and no payment was taken. You can try again anytime.
+            </p>
+            <a href="{{ path('app_reserve') }}"
+               class="inline-block bg-brass text-charcoal px-8 py-3 text-sm brand-mark hover:bg-brass-dim transition-colors">
+                Back to Reserve
+            </a>
+        </div>
+    </section>
+{% endblock %}
