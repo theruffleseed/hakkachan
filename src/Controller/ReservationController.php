@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Reservation;
+use App\Reservation\GuestDetails;
 use App\Reservation\Pricing;
 use App\Reservation\SeatingCalendar;
 use App\Repository\ReservationRepository;
@@ -54,6 +55,17 @@ class ReservationController extends AbstractController
 
         $pax = (int) $request->request->get('pax');
         $dateInput = (string) $request->request->get('date');
+        $guest = GuestDetails::fromInput(
+            $request->request->get('name'),
+            $request->request->get('phone'),
+            $request->request->get('email'),
+        );
+
+        if (!$guest) {
+            $this->addFlash('error', 'Please give us your name, and a valid email address if you enter one.');
+
+            return $this->redirectToRoute('app_reserve');
+        }
 
         $seatingDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $dateInput) ?: null;
         $isValidSeatingDate = $seatingDate && \in_array($seatingDate, SeatingCalendar::upcomingDates(new \DateTimeImmutable('today'), 26), false);
@@ -73,7 +85,7 @@ class ReservationController extends AbstractController
             return $this->redirectToRoute('app_reserve');
         }
 
-        $reservation = new Reservation($seatingDate, $pax, Pricing::amountCents($pax));
+        $reservation = new Reservation($seatingDate, $pax, Pricing::amountCents($pax), $guest->name, $guest->phone, $guest->email);
         $this->em->persist($reservation);
         $this->em->flush();
 
@@ -90,6 +102,9 @@ class ReservationController extends AbstractController
                 ],
                 'quantity' => $pax,
             ]],
+            // Name and phone come from our own form, so Stripe only needs the card.
+            // Without an email of our own, Stripe asks for one to send the receipt.
+            ...($guest->email ? ['customer_email' => $guest->email] : []),
             'metadata' => ['reservation_id' => $reservation->getId()],
             'success_url' => $this->generateUrl('app_reserve_success', [], UrlGeneratorInterface::ABSOLUTE_URL) . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => $this->generateUrl('app_reserve_cancel', [], UrlGeneratorInterface::ABSOLUTE_URL),

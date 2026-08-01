@@ -51,20 +51,27 @@ class StripeWebhookController extends AbstractController
 
             $reservation = $this->reservations->findByStripeSessionId($session->id);
             if ($reservation && $reservation->getStatus() !== 'paid') {
-                $reservation->markPaid($session->customer_details?->email ?? 'unknown');
+                $reservation->markPaid();
                 $this->em->flush();
 
                 if ($this->notifyEmail !== '') {
                     $this->mailer->send((new Email())
                         ->from($this->notifyEmail)
                         ->to($this->notifyEmail)
-                        ->subject(\sprintf('New reservation: %s, %d pax', $reservation->getSeatingDate()->format('D, j M Y'), $reservation->getPax()))
-                        ->text(\sprintf(
-                            "Date: %s\nPax: %d\nAmount: RM%s\nGuest email: %s\nStripe session: %s\n",
+                        ->subject(\sprintf(
+                            'New reservation: %s — %s, %d pax',
+                            $reservation->getGuestName() ?? 'unknown',
                             $reservation->getSeatingDate()->format('D, j M Y'),
                             $reservation->getPax(),
-                            number_format($reservation->getAmountCents() / 100, 2),
+                        ))
+                        ->text(\sprintf(
+                            "Name: %s\nPhone: %s\nEmail: %s\nGuests: %d\n\nDate: %s\nAmount: RM%s\nStripe session: %s\n",
+                            $reservation->getGuestName() ?? 'unknown',
+                            $reservation->getGuestPhone() ?? 'unknown',
                             $reservation->getGuestEmail() ?? 'unknown',
+                            $reservation->getPax(),
+                            $reservation->getSeatingDate()->format('D, j M Y'),
+                            number_format($reservation->getAmountCents() / 100, 2),
                             $session->id,
                         )));
                 }

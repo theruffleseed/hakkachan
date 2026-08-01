@@ -32,14 +32,29 @@ class Reservation
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $guestEmail = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $guestName = null;
+
+    #[ORM\Column(length: 32, nullable: true)]
+    private ?string $guestPhone = null;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct(\DateTimeImmutable $seatingDate, int $pax, int $amountCents)
-    {
+    public function __construct(
+        \DateTimeImmutable $seatingDate,
+        int $pax,
+        int $amountCents,
+        string $guestName,
+        ?string $guestPhone,
+        ?string $guestEmail,
+    ) {
         $this->seatingDate = $seatingDate;
         $this->pax = $pax;
         $this->amountCents = $amountCents;
+        $this->guestName = $guestName;
+        $this->guestPhone = $guestPhone;
+        $this->guestEmail = $guestEmail;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -68,15 +83,24 @@ class Reservation
         return $this->status;
     }
 
-    public function markPaid(string $guestEmail): void
+    public function markPaid(): void
     {
         $this->status = 'paid';
-        $this->guestEmail = $guestEmail;
     }
 
     public function getGuestEmail(): ?string
     {
         return $this->guestEmail;
+    }
+
+    public function getGuestName(): ?string
+    {
+        return $this->guestName;
+    }
+
+    public function getGuestPhone(): ?string
+    {
+        return $this->guestPhone;
     }
 
     public function getStripeSessionId(): ?string
