@@ -32,7 +32,7 @@ class ReservationController extends AbstractController
     {
         $today = new \DateTimeImmutable('today');
         $dates = [];
-        foreach (SeatingCalendar::upcomingDates($today, 8) as $date) {
+        foreach (SeatingCalendar::upcomingDates($today) as $date) {
             $remaining = SeatingCalendar::CAPACITY_PAX - $this->reservations->paidPaxForDate($date);
             // A date with fewer seats left than the minimum booking size can't be booked at all.
             if ($remaining >= Pricing::MIN_PAX) {
@@ -43,6 +43,7 @@ class ReservationController extends AbstractController
         return $this->render('page/reserve.html.twig', [
             'pricePerPax' => Pricing::PRICE_PER_PAX_CENTS / 100,
             'minPax' => Pricing::MIN_PAX,
+            'bookingWeeks' => SeatingCalendar::BOOKING_WEEKS,
             'dates' => $dates,
         ]);
     }
@@ -68,7 +69,7 @@ class ReservationController extends AbstractController
         }
 
         $seatingDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $dateInput) ?: null;
-        $isValidSeatingDate = $seatingDate && \in_array($seatingDate, SeatingCalendar::upcomingDates(new \DateTimeImmutable('today'), 26), false);
+        $isValidSeatingDate = $seatingDate && \in_array($seatingDate, SeatingCalendar::upcomingDates(new \DateTimeImmutable('today')), false);
 
         if (!$isValidSeatingDate || $pax < Pricing::MIN_PAX) {
             $this->addFlash('error', 'Please pick a valid date and pax count.');

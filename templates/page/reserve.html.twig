@@ -9,8 +9,9 @@
             <p class="brand-mark text-xs text-brass mb-6">Reserve</p>
             <h1 class="text-4xl md:text-5xl font-light mb-6 text-charcoal">Reserve a Seat</h1>
             <p class="text-charcoal/70 leading-relaxed mb-10">
-                RM{{ pricePerPax }} per pax, the full seven-course set. Minimum {{ minPax }} pax per booking.
+                RM{{ pricePerPax }} per pax, the full six-course set. Minimum {{ minPax }} pax per booking.
                 Please arrive between 6:00pm&ndash;8:00pm, Fridays &amp; Saturdays.
+                Bookings open {{ bookingWeeks }} weeks ahead.
             </p>
 
             {% for message in app.flashes('error') %}

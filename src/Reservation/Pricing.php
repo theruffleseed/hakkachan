@@ -6,7 +6,7 @@ use InvalidArgumentException;
 
 final class Pricing
 {
-    public const int PRICE_PER_PAX_CENTS = 23000; // RM230.00
+    public const int PRICE_PER_PAX_CENTS = 19800; // RM198.00
     public const int MIN_PAX = 2;
 
     public static function amountCents(int $pax): int

@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Hakkachan — Hakka Dining Residency, Kuala Lumpur{% endblock %}
-{% block meta_description %}Hakkachan is an 18-seat Hakka dining residency in Kuala Lumpur, hosted in collaboration with Intasek. Season One is now seating — Fridays &amp; Saturdays, RM230 per person.{% endblock %}
+{% block meta_description %}Hakkachan is an 18-seat Hakka dining residency in Kuala Lumpur, hosted in collaboration with Intasek. Season One is now seating — Fridays &amp; Saturdays, RM{{ pricePerPax }} per person.{% endblock %}
 
 {% block nav %}
     {% include 'partials/_nav.html.twig' with { transparent: true } %}
@@ -9,9 +9,11 @@
 
 {% block body %}
     <section class="relative min-h-screen flex items-end bg-charcoal text-bone overflow-hidden">
-        <img src="{{ asset('images/intasek-room.jpg') }}" alt="" width="720" height="1080"
-             class="absolute inset-0 w-full h-full object-cover object-center" />
-        <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/85 to-charcoal/50"></div>
+        <img src="{{ asset('images/newhero.jpeg') }}"
+             alt="The siblings behind Hakkachan, standing in the doorway at Intasek"
+             width="720" height="1080"
+             class="absolute inset-0 w-full h-full object-cover object-[center_55%]" />
+        <div class="absolute inset-0 bg-gradient-to-t from-charcoal from-42% via-charcoal/80 via-52% to-charcoal/5"></div>
 
         <div class="relative max-w-6xl mx-auto px-6 pt-40 pb-20 md:pb-28 w-full">
             <p class="brand-mark text-xs md:text-sm text-brass mb-6">Season One &middot; Now Seating</p>
@@ -26,8 +28,8 @@
                     Reserve a Seat
                 </a>
                 <div class="text-sm text-bone-dim">
-                    <p>Fridays &amp; Saturdays &middot; 18 seats &middot; RM230 per person</p>
-                    <p class="mt-1">11 Jalan Tasek, 58100 Kuala Lumpur</p>
+                    <p>Fridays &amp; Saturdays &middot; 18 seats &middot; RM{{ pricePerPax }} per person</p>
+                    <p class="mt-1">Arrive between 6pm and 8pm &middot; 11 Jalan Tasek, 58100 Kuala Lumpur</p>
                 </div>
             </div>
         </div>
@@ -40,14 +42,14 @@
                  class="w-full h-80 md:h-[26rem] object-cover object-center order-first md:order-last" />
             <div>
                 <p class="brand-mark text-xs text-brass mb-6">Our Story</p>
-                <p class="font-serif text-xl md:text-2xl font-light leading-relaxed text-charcoal mb-6">
-                    <span class="brand-mark">Hakkachan</span> began as a conversation between siblings about the food of our rural Hakka childhood in Malacca and the joyfully refreshed heritage food scene of Kuala Lumpur today.
+                <p class="font-serif text-base md:text-lg font-light leading-relaxed text-charcoal mb-6">
+                    <span class="brand-mark">Hakkachan</span> began as a conversation between siblings about the food of our rural Hakka childhood in Malacca.
                 </p>
-                <p class="font-serif text-xl md:text-2xl font-light leading-relaxed text-charcoal mb-6">
-                    Created in collaboration with <span class="brand-mark">Intasek</span>, it is an exploration of how Hakka flavours and Malaccan traditions can find new expression in the city.
+                <p class="font-serif text-base md:text-lg font-light leading-relaxed text-charcoal mb-6">
+                    Inspired by the joyfully refreshed heritage food scene of Kuala Lumpur today, it is an exploration of how Hakka flavours and Malaccan traditions may find new expression in the city.
                 </p>
-                <p class="font-serif text-xl md:text-2xl font-light leading-relaxed text-charcoal">
-                    Join us around the table for generous food and memorable conversation in a dining room we hope will turn strangers into friends.
+                <p class="font-serif text-base md:text-lg font-light leading-relaxed text-charcoal">
+                    Created in collaboration with <span class="brand-mark">Intasek</span>, <span class="brand-mark">Hakkachan</span> invites you to gather around the table for generous food and memorable conversation in a dining room we hope will turn strangers into friends.
                 </p>
             </div>
         </div>
@@ -59,7 +61,7 @@
                 <p class="brand-mark text-xs text-brass mb-6">Season One</p>
                 <h2 class="text-3xl md:text-4xl font-light mb-6">Six Dishes. One evening.</h2>
                 <p class="text-bone-dim leading-relaxed">
-                    Prix fixe menu, no à la carte. BYOB welcome, corkage RM50 per bottle. Mixers available for purchase.
+                    Prix fixe menu, no à la carte. RM{{ pricePerPax }} per person, minimum booking 2 seats. BYOB welcome, corkage RM50 per bottle. Mixers available for purchase.
                 </p>
             </div>
             <div class="border border-white/10 p-8 md:p-10 text-center">
@@ -67,7 +69,7 @@
                 <ul class="space-y-3 font-serif text-lg font-light text-bone-dim">
                     <li>Spiced Beef Suet, Grilled with Pineapple</li>
                     <li>Hakka Pasta with Luicha Pesto</li>
-                    <li>Cabbage Wallets with Porky Paste</li>
+                    <li>Cabbage Wallet with Porky Paste</li>
                     <li>Pasture-Raised Chicken, Tipsy Hakka Style</li>
                     <li>Slow Roasted Pork Collar with Sun-Dried Bokchoy</li>
                     <li>Sweet Potato Tongshui</li>
