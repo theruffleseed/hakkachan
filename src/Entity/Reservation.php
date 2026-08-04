@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ReservationRepository;
+use App\Reservation\GuestDetails;
+use App\Reservation\Pricing;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -76,6 +78,34 @@ class Reservation
     public function getAmountCents(): int
     {
         return $this->amountCents;
+    }
+
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setSeatingDate(\DateTimeImmutable $seatingDate): void
+    {
+        $this->seatingDate = $seatingDate;
+    }
+
+    /**
+     * The amount follows the pax count so the record stays internally
+     * consistent. It records what the booking is worth, not what Stripe
+     * charged — an admin edit moves neither money nor receipts.
+     */
+    public function setPax(int $pax): void
+    {
+        $this->pax = $pax;
+        $this->amountCents = Pricing::amountCents($pax);
+    }
+
+    public function setGuest(GuestDetails $guest): void
+    {
+        $this->guestName = $guest->name;
+        $this->guestPhone = $guest->phone;
+        $this->guestEmail = $guest->email;
     }
 
     public function getStatus(): string

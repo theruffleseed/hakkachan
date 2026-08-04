@@ -11,6 +11,10 @@
                 {{ bookings|length }} paid booking{{ bookings|length == 1 ? '' : 's' }} &middot; {{ totalPax }} guest{{ totalPax == 1 ? '' : 's' }}
             </p>
 
+            {% for message in app.flashes('notice') %}
+                <p class="text-sm text-brass-dim mb-6">{{ message }}</p>
+            {% endfor %}
+
             {% if bookings is empty %}
                 <p class="text-charcoal/70">No paid bookings for any upcoming seating.</p>
             {% else %}
@@ -22,7 +26,8 @@
                                 <th class="py-3 pr-4 font-normal">Guest</th>
                                 <th class="py-3 pr-4 font-normal">Contact</th>
                                 <th class="py-3 pr-4 font-normal text-right">Pax</th>
-                                <th class="py-3 font-normal text-right">Paid</th>
+                                <th class="py-3 pr-4 font-normal text-right">Paid</th>
+                                <th class="py-3 font-normal text-right"><span class="sr-only">Edit</span></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -35,7 +40,10 @@
                                         {{ booking.guestEmail ?? '—' }}
                                     </td>
                                     <td class="py-4 pr-4 text-right">{{ booking.pax }}</td>
-                                    <td class="py-4 text-right whitespace-nowrap">RM{{ (booking.amountCents / 100)|number_format(2) }}</td>
+                                    <td class="py-4 pr-4 text-right whitespace-nowrap">RM{{ (booking.amountCents / 100)|number_format(2) }}</td>
+                                    <td class="py-4 text-right whitespace-nowrap">
+                                        <a href="{{ path('app_admin_edit', { id: booking.id }) }}" class="text-brass hover:underline">Edit</a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
