@@ -24,16 +24,24 @@ class AdminController extends AbstractController
     #[Route('/admin', name: 'app_admin', methods: ['GET'])]
     public function index(): Response
     {
+        // Already ordered by seating date, so one pass groups it.
         $bookings = $this->reservations->findPaidFrom(new \DateTimeImmutable('today'));
 
-        $pax = 0;
+        $seatings = [];
+        $totalPax = 0;
         foreach ($bookings as $booking) {
-            $pax += $booking->getPax();
+            $key = $booking->getSeatingDate()->format('Y-m-d');
+            $seatings[$key]['date'] ??= $booking->getSeatingDate();
+            $seatings[$key]['bookings'][] = $booking;
+            $seatings[$key]['pax'] = ($seatings[$key]['pax'] ?? 0) + $booking->getPax();
+            $totalPax += $booking->getPax();
         }
 
         return $this->render('page/admin.html.twig', [
-            'bookings' => $bookings,
-            'totalPax' => $pax,
+            'seatings' => $seatings,
+            'totalBookings' => \count($bookings),
+            'totalPax' => $totalPax,
+            'capacity' => SeatingCalendar::CAPACITY_PAX,
         ]);
     }
 
