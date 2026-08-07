@@ -6,11 +6,18 @@
     <section class="py-24 md:py-28">
         <div class="max-w-4xl mx-auto px-6">
             <p class="brand-mark text-xs text-brass mb-6">Admin</p>
-            <h1 class="text-4xl md:text-5xl font-light mb-2 text-charcoal">Upcoming Bookings</h1>
-            <p class="text-charcoal/60 text-sm mb-16">
-                {{ totalBookings }} paid booking{{ totalBookings == 1 ? '' : 's' }} across
-                {{ seatings|length }} seating{{ seatings|length == 1 ? '' : 's' }} &middot; {{ totalPax }} guest{{ totalPax == 1 ? '' : 's' }}
-            </p>
+            <div class="flex flex-wrap items-start justify-between gap-4 mb-16">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-light mb-2 text-charcoal">Upcoming Bookings</h1>
+                    <p class="text-charcoal/60 text-sm">
+                        {{ totalBookings }} paid booking{{ totalBookings == 1 ? '' : 's' }} across
+                        {{ seatings|length }} seating{{ seatings|length == 1 ? '' : 's' }} &middot; {{ totalPax }} guest{{ totalPax == 1 ? '' : 's' }}
+                    </p>
+                </div>
+                <a href="{{ path('app_admin_new') }}" class="bg-brass text-charcoal px-6 py-3 text-sm brand-mark hover:bg-brass-dim transition-colors whitespace-nowrap">
+                    Add booking
+                </a>
+            </div>
 
             {% for message in app.flashes('notice') %}
                 <p class="text-sm text-brass-dim mb-6">{{ message }}</p>

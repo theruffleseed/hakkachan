@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Reservation;
 use App\Reservation\GuestDetails;
 use App\Reservation\Pricing;
+use App\Reservation\ReservationNotifier;
 use App\Reservation\SeatingCalendar;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,7 +19,56 @@ class AdminController extends AbstractController
     public function __construct(
         private readonly ReservationRepository $reservations,
         private readonly EntityManagerInterface $em,
+        private readonly ReservationNotifier $notifier,
     ) {
+    }
+
+    #[Route('/admin/new', name: 'app_admin_new', methods: ['GET'])]
+    public function new(): Response
+    {
+        return $this->render('page/admin_new.html.twig', [
+            'minPax' => Pricing::MIN_PAX,
+            'capacity' => SeatingCalendar::CAPACITY_PAX,
+        ]);
+    }
+
+    #[Route('/admin/new', name: 'app_admin_create', methods: ['POST'])]
+    public function create(Request $request): Response
+    {
+        $this->isCsrfTokenValid('admin', $request->request->get('_csrf_token'))
+            or throw $this->createAccessDeniedException('Invalid CSRF token.');
+
+        $guest = GuestDetails::fromInput(
+            $request->request->get('name'),
+            $request->request->get('phone'),
+            $request->request->get('email'),
+        );
+        $pax = (int) $request->request->get('pax');
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', (string) $request->request->get('date')) ?: null;
+
+        if (!$guest || !$date || $pax < Pricing::MIN_PAX) {
+            $this->addFlash('error', sprintf('Need a name, a valid date, and at least %d pax.', Pricing::MIN_PAX));
+
+            return $this->redirectToRoute('app_admin_new');
+        }
+
+        $taken = $this->reservations->paidPaxForDate($date);
+        if ($taken + $pax > SeatingCalendar::CAPACITY_PAX) {
+            $this->addFlash('error', sprintf('Only %d seats left on %s.', SeatingCalendar::CAPACITY_PAX - $taken, $date->format('D, j M Y')));
+
+            return $this->redirectToRoute('app_admin_new');
+        }
+
+        $booking = new Reservation($date, $pax, Pricing::amountCents($pax), $guest->name, $guest->phone, $guest->email);
+        $booking->markPaid();
+        $this->em->persist($booking);
+        $this->em->flush();
+
+        $this->notifier->notify($booking, 'Admin — cash/transfer');
+
+        $this->addFlash('notice', sprintf('Added %s.', $guest->name));
+
+        return $this->redirectToRoute('app_admin');
     }
 
     #[Route('/admin', name: 'app_admin', methods: ['GET'])]

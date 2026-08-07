@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add Booking — Hakkachan{% endblock %}
+
+{% block body %}
+    <section class="py-24 md:py-28">
+        <div class="max-w-md mx-auto px-6">
+            <p class="brand-mark text-xs text-brass mb-6">Admin</p>
+            <h1 class="text-4xl md:text-5xl font-light mb-2 text-charcoal">Add Booking</h1>
+            <p class="text-charcoal/60 text-sm mb-10">
+                For guests paying by cash or direct transfer. Marked paid immediately.
+            </p>
+
+            {% for message in app.flashes('error') %}
+                <p class="text-sm text-red-700 mb-6">{{ message }}</p>
+            {% endfor %}
+
+            <form method="post" action="{{ path('app_admin_create') }}" data-turbo="false"
+                  class="flex flex-col gap-4 text-left">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+
+                <label class="text-sm">
+                    <span class="block mb-1 text-charcoal/70">Name</span>
+                    <input type="text" name="name" required maxlength="255"
+                           class="w-full border border-charcoal/25 px-4 py-3 bg-bone">
+                </label>
+
+                <label class="text-sm">
+                    <span class="block mb-1 text-charcoal/70">Phone</span>
+                    <input type="tel" name="phone" maxlength="32"
+                           class="w-full border border-charcoal/25 px-4 py-3 bg-bone">
+                </label>
+
+                <label class="text-sm">
+                    <span class="block mb-1 text-charcoal/70">Email</span>
+                    <input type="email" name="email" maxlength="255"
+                           class="w-full border border-charcoal/25 px-4 py-3 bg-bone">
+                </label>
+
+                <label class="text-sm">
+                    <span class="block mb-1 text-charcoal/70">Seating date</span>
+                    <input type="date" name="date" required
+                           class="w-full border border-charcoal/25 px-4 py-3 bg-bone">
+                </label>
+
+                <label class="text-sm">
+                    <span class="block mb-1 text-charcoal/70">Seats</span>
+                    <input type="number" name="pax" required min="{{ minPax }}" max="{{ capacity }}" value="{{ minPax }}"
+                           class="w-full border border-charcoal/25 px-4 py-3 bg-bone">
+                </label>
+
+                <div class="flex items-center gap-6 mt-2">
+                    <button type="submit" class="bg-brass text-charcoal px-8 py-3 text-sm brand-mark hover:bg-brass-dim transition-colors">
+                        Add booking
+                    </button>
+                    <a href="{{ path('app_admin') }}" class="text-sm text-charcoal/60 hover:text-charcoal">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock %}

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Reservation\ReservationNotifier;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -13,8 +14,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 class StripeWebhookController extends AbstractController
@@ -22,11 +21,9 @@ class StripeWebhookController extends AbstractController
     public function __construct(
         #[Autowire(env: 'STRIPE_WEBHOOK_SECRET')]
         private readonly string $webhookSecret,
-        #[Autowire(env: 'RESERVATION_NOTIFY_EMAIL')]
-        private readonly string $notifyEmail,
         private readonly ReservationRepository $reservations,
         private readonly EntityManagerInterface $em,
-        private readonly MailerInterface $mailer,
+        private readonly ReservationNotifier $notifier,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -54,27 +51,7 @@ class StripeWebhookController extends AbstractController
                 $reservation->markPaid();
                 $this->em->flush();
 
-                if ($this->notifyEmail !== '') {
-                    $this->mailer->send((new Email())
-                        ->from($this->notifyEmail)
-                        ->to($this->notifyEmail)
-                        ->subject(\sprintf(
-                            'New reservation: %s — %s, %d pax',
-                            $reservation->getGuestName() ?? 'unknown',
-                            $reservation->getSeatingDate()->format('D, j M Y'),
-                            $reservation->getPax(),
-                        ))
-                        ->text(\sprintf(
-                            "Name: %s\nPhone: %s\nEmail: %s\nGuests: %d\n\nDate: %s\nAmount: RM%s\nStripe session: %s\n",
-                            $reservation->getGuestName() ?? 'unknown',
-                            $reservation->getGuestPhone() ?? 'unknown',
-                            $reservation->getGuestEmail() ?? 'unknown',
-                            $reservation->getPax(),
-                            $reservation->getSeatingDate()->format('D, j M Y'),
-                            number_format($reservation->getAmountCents() / 100, 2),
-                            $session->id,
-                        )));
-                }
+                $this->notifier->notify($reservation, 'Stripe — ' . $session->id);
             }
 
             $this->logger->info('Reservation paid', [
