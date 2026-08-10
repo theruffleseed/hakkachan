@@ -35,7 +35,7 @@
                                 class="mt-2 w-full border border-charcoal/30 px-4 py-3 text-charcoal bg-bone focus:outline-none focus:border-charcoal">
                             {% for option in dates %}
                                 <option value="{{ option.date|date('Y-m-d') }}" data-remaining="{{ option.remaining }}">
-                                    {{ option.date|date('D, j M Y') }} — {{ option.remaining }} seat{{ option.remaining != 1 ? 's' : '' }} left
+                                    {{ option.date|date('D, j M Y') }}{% if option.remaining <= 2 %} — {{ option.remaining }} seat{{ option.remaining != 1 ? 's' : '' }} left{% endif %}
                                 </option>
                             {% endfor %}
                         </select>
