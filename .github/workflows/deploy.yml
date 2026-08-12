@@ -30,8 +30,12 @@ jobs:
           COMPOSER_MEMORY_LIMIT: 1G
         run: |
           if ! bash bin/build-deploy.sh hakkachan-deploy.zip > /tmp/build.log 2>&1; then
-            echo "=== build failed, last 60 lines ==="
-            tail -60 /tmp/build.log
+            echo "=== build failed ==="
+            tail -60 /tmp/build.log | split -l 15 - /tmp/blk_
+            for f in /tmp/blk_*; do
+              line="$(tr '\n' '|' < "$f")"
+              echo "::error file=deploy.yml::$line"
+            done
             exit 1
           fi
           tail -5 /tmp/build.log
