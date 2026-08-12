@@ -26,7 +26,13 @@ jobs:
 
       - name: Build and smoke-test deploy artifact
         run: |
-          bash bin/build-deploy.sh hakkachan-deploy.zip > /tmp/build.log 2>&1 || { echo "=== build failed, last 50 lines ==="; tail -50 /tmp/build.log; exit 1; }
+          if ! bash bin/build-deploy.sh hakkachan-deploy.zip > /tmp/build.log 2>&1; then
+            echo "=== build failed ==="
+            tail -60 /tmp/build.log | while IFS= read -r line; do
+              echo "::error file=deploy.yml::$line"
+            done
+            exit 1
+          fi
           tail -5 /tmp/build.log
 
       - name: Upload build log on failure
