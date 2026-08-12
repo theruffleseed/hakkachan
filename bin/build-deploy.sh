@@ -17,6 +17,9 @@ set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 out_zip="${1:-$repo/../hakkachan-deploy.zip}"
+if [[ "$out_zip" != /* ]]; then
+    out_zip="$(pwd)/$out_zip"
+fi
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
