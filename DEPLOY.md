@@ -1,13 +1,40 @@
 # Deploying hakkachan.my
 
-**There is one method. Do not invent another. Do not hand-assemble the zip.**
+**One method. Do not invent another. Do not hand-assemble the zip.**
+
+## Automated (normal case)
+
+Push to `main` and GitHub Actions does the whole job:
+
+1. Runs `bin/build-deploy.sh` — builds `hakkachan-deploy.zip` from the pushed
+   commit and smoke-tests it (it will not finish unless the artifact actually
+   serves every page in prod).
+2. Uploads the zip to the account home (`/home/hakkacha/hakkachan-deploy.zip`)
+   over FTP.
+3. Calls `https://hakkachan.my/deploy.php?token=<DEPLOY_TOKEN>&zip=hakkachan-deploy.zip`
+   — the hook extracts the zip into the account home (same as a manual File
+   Manager extract), clears `var/cache`, and runs pending migrations.
+
+The workflow needs four repository secrets (Settings → Secrets and variables →
+Actions):
+
+| Secret        | Value                                        |
+|---------------|----------------------------------------------|
+| `FTP_HOST`    | your FTP host (e.g. `ftp.hakkachan.my`)      |
+| `FTP_USER`    | your cPanel FTP username (`hakkacha`)        |
+| `FTP_PASSWORD`| your cPanel FTP password                     |
+| `DEPLOY_TOKEN`| `d381cae54ba1f412189df83f9c85b23b38a53555`   |
+
+If the FTP account roots somewhere other than the account home, add `FTP_PATH`
+(e.g. `/subdir`) as a fifth secret.
+
+## Manual (fallback — old flow, still works)
 
 ```bash
 cd web && ./bin/build-deploy.sh
 ```
 
-That produces `hakkachan-deploy.zip` in the repo root and will not finish unless
-the artifact actually serves every page in prod. Then tell Ken, verbatim:
+That produces `hakkachan-deploy.zip` in the repo root. Then:
 
 1. Upload `hakkachan-deploy.zip` to `/home/hakkacha` (the account home, one
    level **above** `public_html`).
@@ -16,6 +43,12 @@ the artifact actually serves every page in prod. Then tell Ken, verbatim:
    `https://hakkachan.my/deploy.php?token=d381cae54ba1f412189df83f9c85b23b38a53555`
 
 Always print that URL in full, token included. Never a placeholder.
+
+## First CI deploy
+
+The server's `deploy.php` only gained the `?zip=` extraction step when that
+change shipped. Until then, run **one** manual deploy (above) from the current
+`main`; afterwards every push deploys automatically.
 
 ## The server
 
@@ -27,6 +60,7 @@ migrations).
 /home/hakkacha/
 ├── public_html/                  docroot — index.php, deploy.php, .htaccess, assets/
 ├── vendor/ src/ config/ templates/ migrations/ bin/ assets/ var/
+├── hakkachan-deploy.zip          uploaded by CI, extracted by the hook
 ├── .env                          shipped in the zip, APP_ENV=prod
 └── .env.local                    NEVER shipped — secrets, see below
 ```
@@ -38,14 +72,13 @@ App files sit **directly in the home directory** because
 It is not the app root, whatever its name suggests. Assuming otherwise took the
 live site down on 2026-08-01.
 
-## Never in the zip
+## Never overwritten
+
+`deploy.php` skips these on extraction, and the build never packages them:
 
 - `.env.local` — `APP_ENV=prod`, `APP_SECRET`, Stripe keys, `DEPLOY_TOKEN`.
   Lives only on the server. Overwriting it breaks checkout and the deploy hook.
-- `var/data_prod.db` — the reservations, SQLite. Overwriting it destroys
-  every booking.
-
-Both survive an extract because the archive simply does not contain them.
+- `var/*.db` — the reservations, SQLite. Overwriting it destroys every booking.
 
 ## Host quirks, each learned the hard way
 

@@ -1,9 +1,15 @@
 <?php
 
-// One-off deploy hook: hit this URL after extracting a new build to clear the
-// stale compiled container/cache from the previous deploy, and to run any
-// pending Doctrine migrations (no SSH/console access on this host). Protected
-// by DEPLOY_TOKEN (set in .env.local on the server, never committed).
+// Deploy hook: hit this URL after a build lands on the server to extract it,
+// clear the stale compiled container/cache from the previous deploy, and run
+// any pending Doctrine migrations (no SSH/console access on this host).
+// Protected by DEPLOY_TOKEN (set in .env.local on the server, never committed).
+//
+// With ?zip=<name>, the hook first extracts <name> from the account home into
+// the app root — this is how GitHub Actions deploys (it FTPs hakkachan-
+// deploy.zip to the home dir, then hits this URL). Extracting via the hook
+// works because a build zip extracts directly into the account home; without
+// the zip param the hook behaves like the old one-off version.
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
@@ -35,6 +41,52 @@ function rrmdir(string $dir): void
 }
 
 $root = dirname(__DIR__);
+
+// Files that must never be overwritten, however plausible the archive looks.
+// The build never packages them, but the live site has already been taken
+// down once by a deploy overwriting exactly these.
+function isProtected(string $name): bool
+{
+    return str_starts_with($name, '.env.local')
+        || preg_match('#^var/[^/]+\.db($|\.)|^var/share/#', $name) === 1;
+}
+
+if (isset($_GET['zip'])) {
+    $zipName = basename($_GET['zip']); // no path traversal
+    $zipPath = $root.'/'.$zipName;
+
+    if (!is_file($zipPath)) {
+        http_response_code(404);
+        exit("Zip not found: $zipName\n");
+    }
+
+    if (!class_exists(ZipArchive::class)) {
+        http_response_code(500);
+        exit("ZipArchive extension missing on this host\n");
+    }
+
+    $zip = new ZipArchive();
+    if ($zip->open($zipPath) !== true) {
+        http_response_code(500);
+        exit("Cannot open $zipName\n");
+    }
+
+    $count = 0;
+    for ($i = 0; $i < $zip->numFiles; ++$i) {
+        $name = $zip->getNameIndex($i);
+        if ($name === '' || str_contains($name, '..') || str_starts_with($name, '/')
+            || isProtected($name) || $name === $zipName) {
+            continue;
+        }
+        $zip->extractTo($root, [$name]);
+        ++$count;
+    }
+    $zip->close();
+
+    header('Content-Type: text/plain');
+    echo "Extracted $count entries from $zipName.\n\n";
+}
+
 rrmdir($root.'/var/cache');
 mkdir($root.'/var/cache', 0775, true);
 

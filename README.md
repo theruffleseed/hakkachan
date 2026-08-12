@@ -25,8 +25,8 @@ php bin/phpunit
 **Read [`DEPLOY.md`](DEPLOY.md) before touching builds, zips, uploads, paths,
 or the server — there is exactly one deploy method and one server layout.**
 
-Commit any template/asset changes first — the build packages `git archive
-HEAD`, so uncommitted edits silently ship stale content. Then:
+Normal deploys are automatic: **push to `main`** and GitHub Actions builds the
+artifact, uploads it via FTP and runs the deploy hook. For the manual fallback:
 
 ```bash
 ./bin/build-deploy.sh

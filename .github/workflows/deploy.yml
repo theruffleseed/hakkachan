@@ -1,0 +1,47 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: sqlite3, pdo_sqlite, mbstring, intl
+          tools: composer
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y zip unzip
+
+      - name: Build and smoke-test deploy artifact
+        run: bash bin/build-deploy.sh hakkachan-deploy.zip
+
+      - name: Upload zip to cPanel home via FTP
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PATH: ${{ secrets.FTP_PATH }}
+        run: |
+          path="${FTP_PATH:-/}/hakkachan-deploy.zip"
+          curl -sS --show-error --fail \
+            -u "$FTP_USER:$FTP_PASSWORD" \
+            -T hakkachan-deploy.zip "ftp://$FTP_HOST$path"
+
+      - name: Run the deploy hook
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          curl -sS --show-error --fail \
+            "https://hakkachan.my/deploy.php?token=$DEPLOY_TOKEN&zip=hakkachan-deploy.zip"
