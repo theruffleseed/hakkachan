@@ -26,10 +26,10 @@ jobs:
 
       - name: Build and smoke-test deploy artifact
         env:
-          COMPOSER_MEMORY_LIMIT: -1
+          COMPOSER_MEMORY_LIMIT: 1G
         run: |
           mkdir -p /tmp/phpbin
-          printf '#!/bin/bash\nexec php -d memory_limit=-1 "$@"\n' > /tmp/phpbin/php
+          printf '#!/bin/bash\nexec php -d memory_limit=1G "$@"\n' > /tmp/phpbin/php
           chmod +x /tmp/phpbin/php
           export PATH=/tmp/phpbin:$PATH
           if ! bash bin/build-deploy.sh hakkachan-deploy.zip > /tmp/build.log 2>&1; then
