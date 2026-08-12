@@ -20,6 +20,7 @@ jobs:
           php-version: '8.4'
           extensions: sqlite3, pdo_sqlite, mbstring, intl
           tools: composer
+          ini-values: memory_limit=1G
 
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y zip unzip
@@ -28,10 +29,6 @@ jobs:
         env:
           COMPOSER_MEMORY_LIMIT: 1G
         run: |
-          mkdir -p /tmp/phpbin
-          printf '#!/bin/bash\nexec php -d memory_limit=1G "$@"\n' > /tmp/phpbin/php
-          chmod +x /tmp/phpbin/php
-          export PATH=/tmp/phpbin:$PATH
           if ! bash bin/build-deploy.sh hakkachan-deploy.zip > /tmp/build.log 2>&1; then
             echo "=== build failed, last 60 lines ==="
             tail -60 /tmp/build.log
