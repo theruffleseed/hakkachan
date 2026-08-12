@@ -25,11 +25,19 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y zip unzip
 
       - name: Build and smoke-test deploy artifact
+        env:
+          COMPOSER_MEMORY_LIMIT: -1
         run: |
+          mkdir -p /tmp/phpbin
+          printf '#!/bin/bash\nexec php -d memory_limit=-1 "$@"\n' > /tmp/phpbin/php
+          chmod +x /tmp/phpbin/php
+          export PATH=/tmp/phpbin:$PATH
           if ! bash bin/build-deploy.sh hakkachan-deploy.zip > /tmp/build.log 2>&1; then
             echo "=== build failed ==="
-            tail -60 /tmp/build.log | while IFS= read -r line; do
-              echo "::error file=deploy.yml::$line"
+            tail -60 /tmp/build.log | split -l 15 - /tmp/blk_
+            for f in /tmp/blk_*; do
+              line="$(tr '\n' '|' < "$f")"
+              echo "::error file=deploy.yml::${line}"
             done
             exit 1
           fi
