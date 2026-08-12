@@ -28,25 +28,7 @@ jobs:
       - name: Build and smoke-test deploy artifact
         env:
           COMPOSER_MEMORY_LIMIT: 1G
-        run: |
-          if ! bash bin/build-deploy.sh hakkachan-deploy.zip > /tmp/build.log 2>&1; then
-            echo "=== build failed ==="
-            tail -60 /tmp/build.log | split -l 15 - /tmp/blk_
-            for f in /tmp/blk_*; do
-              line="$(tr '\n' '|' < "$f")"
-              echo "::error file=deploy.yml::$line"
-            done
-            exit 1
-          fi
-          tail -5 /tmp/build.log
-
-      - name: Upload build log on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: /tmp/build.log
-          retention-days: 1
+        run: bash bin/build-deploy.sh hakkachan-deploy.zip
 
       - name: Upload zip to cPanel home via FTP
         env:
