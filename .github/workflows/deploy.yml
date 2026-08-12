@@ -25,7 +25,17 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y zip unzip
 
       - name: Build and smoke-test deploy artifact
-        run: bash bin/build-deploy.sh hakkachan-deploy.zip
+        run: |
+          bash bin/build-deploy.sh hakkachan-deploy.zip > /tmp/build.log 2>&1 || { echo "=== build failed, last 50 lines ==="; tail -50 /tmp/build.log; exit 1; }
+          tail -5 /tmp/build.log
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: /tmp/build.log
+          retention-days: 1
 
       - name: Upload zip to cPanel home via FTP
         env:
