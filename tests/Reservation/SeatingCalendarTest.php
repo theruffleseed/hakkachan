@@ -41,4 +41,23 @@ final class SeatingCalendarTest extends TestCase
         // 4 weeks of Fridays and Saturdays, and nothing beyond the cutoff.
         self::assertCount(8, $dates);
     }
+
+    public function testClosesFridayTwoDaysBefore(): void
+    {
+        $friday = new \DateTimeImmutable('2026-09-04');
+        $saturday = new \DateTimeImmutable('2026-09-05');
+
+        self::assertTrue(SeatingCalendar::isOpenForBooking($friday, new \DateTimeImmutable('2026-09-01')));
+        self::assertFalse(SeatingCalendar::isOpenForBooking($friday, new \DateTimeImmutable('2026-09-02')));
+        self::assertFalse(SeatingCalendar::isOpenForBooking($friday, new \DateTimeImmutable('2026-09-03')));
+        self::assertTrue(SeatingCalendar::isOpenForBooking($saturday, new \DateTimeImmutable('2026-09-02')));
+        self::assertFalse(SeatingCalendar::isOpenForBooking($saturday, new \DateTimeImmutable('2026-09-03')));
+
+        $fromWednesday = array_map(
+            static fn (\DateTimeImmutable $d): string => $d->format('Y-m-d'),
+            SeatingCalendar::upcomingDates(new \DateTimeImmutable('2026-09-02')),
+        );
+        self::assertContains('2026-09-04', $fromWednesday);
+        self::assertContains('2026-09-05', $fromWednesday);
+    }
 }

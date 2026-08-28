@@ -23,6 +23,7 @@
                     No seatings currently open for booking — message us directly below.
                 </p>
             {% else %}
+                {% set firstBookable = dates|filter(o => o.bookable)|first %}
                 <form method="post" action="{{ path('app_reserve_checkout') }}" data-turbo="false"
                       data-controller="pax-options" data-pax-options-min-value="{{ minPax }}"
                       class="flex flex-col gap-4 text-left">
@@ -34,8 +35,11 @@
                                 data-pax-options-target="date" data-action="pax-options#refresh"
                                 class="mt-2 w-full border border-charcoal/30 px-4 py-3 text-charcoal bg-bone focus:outline-none focus:border-charcoal">
                             {% for option in dates %}
-                                <option value="{{ option.date|date('Y-m-d') }}" data-remaining="{{ option.remaining }}">
-                                    {{ option.date|date('D, j M Y') }}{% if option.remaining <= 2 %} — {{ option.remaining }} seat{{ option.remaining != 1 ? 's' : '' }} left{% endif %}
+                                <option value="{{ option.date|date('Y-m-d') }}"
+                                        data-remaining="{{ option.remaining }}"
+                                        {% if not option.bookable %}disabled class="text-charcoal/40"{% endif %}
+                                        {% if firstBookable and option.date == firstBookable.date %}selected{% endif %}>
+                                    {{ option.date|date('D, j M Y') }}{% if option.remaining <= 0 %} (Fully Booked){% elseif option.remaining < 4 %} — {{ option.remaining }} seat{{ option.remaining != 1 ? 's' : '' }} left{% endif %}
                                 </option>
                             {% endfor %}
                         </select>
@@ -45,10 +49,12 @@
                         Number of guests
                         <select name="pax" required data-pax-options-target="pax"
                                 class="mt-2 w-full border border-charcoal/30 px-4 py-3 text-charcoal bg-bone focus:outline-none focus:border-charcoal">
-                            {# Populated by the pax-options controller; this is the no-JS fallback for the first date. #}
-                            {% for n in minPax..(dates|first).remaining %}
-                                <option value="{{ n }}">{{ n }}</option>
-                            {% endfor %}
+                            {# Populated by the pax-options controller; this is the no-JS fallback for the first bookable date. #}
+                            {% if firstBookable %}
+                                {% for n in minPax..firstBookable.remaining %}
+                                    <option value="{{ n }}">{{ n }}</option>
+                                {% endfor %}
+                            {% endif %}
                         </select>
                     </label>
 

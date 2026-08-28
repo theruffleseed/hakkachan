@@ -34,10 +34,12 @@ class ReservationController extends AbstractController
         $dates = [];
         foreach (SeatingCalendar::upcomingDates($today) as $date) {
             $remaining = SeatingCalendar::CAPACITY_PAX - $this->reservations->paidPaxForDate($date);
-            // A date with fewer seats left than the minimum booking size can't be booked at all.
-            if ($remaining >= Pricing::MIN_PAX) {
-                $dates[] = ['date' => $date, 'remaining' => $remaining];
-            }
+            $dates[] = [
+                'date' => $date,
+                'remaining' => $remaining,
+                // Inside the 2-day cutoff, or fewer seats than the minimum booking: visible, not selectable.
+                'bookable' => $remaining >= Pricing::MIN_PAX && SeatingCalendar::isOpenForBooking($date, $today),
+            ];
         }
 
         return $this->render('page/reserve.html.twig', [
@@ -68,8 +70,11 @@ class ReservationController extends AbstractController
             return $this->redirectToRoute('app_reserve');
         }
 
+        $today = new \DateTimeImmutable('today');
         $seatingDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $dateInput) ?: null;
-        $isValidSeatingDate = $seatingDate && \in_array($seatingDate, SeatingCalendar::upcomingDates(new \DateTimeImmutable('today')), false);
+        $isValidSeatingDate = $seatingDate
+            && \in_array($seatingDate, SeatingCalendar::upcomingDates($today), false)
+            && SeatingCalendar::isOpenForBooking($seatingDate, $today);
 
         if (!$isValidSeatingDate || $pax < Pricing::MIN_PAX) {
             $this->addFlash('error', 'Please pick a valid date and pax count.');
