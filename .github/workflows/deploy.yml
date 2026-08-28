@@ -42,6 +42,20 @@ jobs:
             -u "$FTP_USER:$FTP_PASSWORD" \
             -T hakkachan-deploy.zip "ftp://$FTP_HOST$path"
 
+      # Live deploy.php is the old cache-only hook and ignores ?zip=. Put the
+      # extractor in place first so the hook can actually unpack the zip.
+      - name: Upload deploy.php via FTP
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PATH: ${{ secrets.FTP_PATH }}
+        run: |
+          path="${FTP_PATH:-/}/public_html/deploy.php"
+          curl -sS --show-error --fail \
+            -u "$FTP_USER:$FTP_PASSWORD" \
+            -T public/deploy.php "ftp://$FTP_HOST$path"
+
       - name: Run the deploy hook
         env:
           DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
