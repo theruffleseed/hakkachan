@@ -11,7 +11,12 @@ Push to `main` and GitHub Actions does the whole job:
    serves every page in prod).
 2. Uploads the zip to the account home (`/home/hakkacha/hakkachan-deploy.zip`)
    over FTP.
-3. Calls `https://hakkachan.my/deploy.php?token=<DEPLOY_TOKEN>&zip=hakkachan-deploy.zip`
+3. Uploads `public/deploy.php` to `public_html/deploy.php` over FTP. The hook
+   that shipped before zip-extract existed ignores `?zip=` and only clears
+   cache — Actions can be green while live files never change. Putting the
+   extractor in place first is required. A successful extract logs
+   `Extracted N entries from hakkachan-deploy.zip`.
+4. Calls `https://hakkachan.my/deploy.php?token=<DEPLOY_TOKEN>&zip=hakkachan-deploy.zip`
    — the hook extracts the zip into the account home (same as a manual File
    Manager extract), clears `var/cache`, and runs pending migrations.
 
@@ -47,8 +52,12 @@ Always print that URL in full, token included. Never a placeholder.
 ## First CI deploy
 
 The server's `deploy.php` only gained the `?zip=` extraction step when that
-change shipped. Until then, run **one** manual deploy (above) from the current
-`main`; afterwards every push deploys automatically.
+change shipped. Until the extractor is on disk, a push can FTP the zip, hit
+the hook, go green, and leave live unchanged. The workflow FTPs
+`public/deploy.php` before calling the hook so that first extract actually
+runs. Confirm `Extracted N entries` in the Actions log — cache-cleared-only
+output means the old hook is still live. There is **no SSH** (port 22
+refused on 218.208.91.159); do not plan around a shell.
 
 ## The server
 
