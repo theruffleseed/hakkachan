@@ -14,9 +14,14 @@
                         {{ seatings|length }} seating{{ seatings|length == 1 ? '' : 's' }} &middot; {{ totalPax }} guest{{ totalPax == 1 ? '' : 's' }}
                     </p>
                 </div>
-                <a href="{{ path('app_admin_new') }}" class="bg-brass text-charcoal px-6 py-3 text-sm brand-mark hover:bg-brass-dim transition-colors whitespace-nowrap">
-                    Add booking
-                </a>
+                <div class="flex gap-3 whitespace-nowrap">
+                    <a href="{{ path('app_admin_closed') }}" class="border border-charcoal/30 text-charcoal px-6 py-3 text-sm brand-mark hover:border-charcoal transition-colors">
+                        Time off
+                    </a>
+                    <a href="{{ path('app_admin_new') }}" class="bg-brass text-charcoal px-6 py-3 text-sm brand-mark hover:bg-brass-dim transition-colors">
+                        Add booking
+                    </a>
+                </div>
             </div>
 
             {% for message in app.flashes('notice') %}

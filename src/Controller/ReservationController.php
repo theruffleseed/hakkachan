@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Reservation;
+use App\Repository\ClosedDateRepository;
 use App\Reservation\GuestDetails;
 use App\Reservation\Pricing;
 use App\Reservation\SeatingCalendar;
@@ -23,6 +24,7 @@ class ReservationController extends AbstractController
         #[Autowire(env: 'STRIPE_SECRET_KEY')]
         private readonly string $stripeSecretKey,
         private readonly ReservationRepository $reservations,
+        private readonly ClosedDateRepository $closedDates,
         private readonly EntityManagerInterface $em,
     ) {
     }
@@ -31,14 +33,18 @@ class ReservationController extends AbstractController
     public function index(): Response
     {
         $today = new \DateTimeImmutable('today');
+        $upcoming = SeatingCalendar::upcomingDates($today);
+        $closedSet = $this->closedDates->closedSetFor($upcoming);
         $dates = [];
-        foreach (SeatingCalendar::upcomingDates($today) as $date) {
+        foreach ($upcoming as $date) {
             $remaining = SeatingCalendar::CAPACITY_PAX - $this->reservations->paidPaxForDate($date);
+            $closed = isset($closedSet[$date->format('Y-m-d')]);
             $dates[] = [
                 'date' => $date,
                 'remaining' => $remaining,
-                // Inside the 2-day cutoff, or fewer seats than the minimum booking: visible, not selectable.
-                'bookable' => $remaining >= Pricing::MIN_PAX && SeatingCalendar::isOpenForBooking($date, $today),
+                'closed' => $closed,
+                // Inside the 2-day cutoff, fully closed by the admin, or fewer seats than the minimum booking: visible, not selectable.
+                'bookable' => !$closed && $remaining >= Pricing::MIN_PAX && SeatingCalendar::isOpenForBooking($date, $today),
             ];
         }
 
@@ -78,6 +84,12 @@ class ReservationController extends AbstractController
 
         if (!$isValidSeatingDate || $pax < Pricing::MIN_PAX) {
             $this->addFlash('error', 'Please pick a valid date and pax count.');
+
+            return $this->redirectToRoute('app_reserve');
+        }
+
+        if ($this->closedDates->isClosed($seatingDate)) {
+            $this->addFlash('error', 'That date is closed — please pick another seating.');
 
             return $this->redirectToRoute('app_reserve');
         }

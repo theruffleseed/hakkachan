@@ -39,7 +39,7 @@
                                         data-remaining="{{ option.remaining }}"
                                         {% if not option.bookable %}disabled class="text-charcoal/40"{% endif %}
                                         {% if firstBookable and option.date == firstBookable.date %}selected{% endif %}>
-                                    {{ option.date|date('D, j M Y') }}{% if option.remaining <= 0 %} (Fully Booked){% elseif option.remaining < 4 %} — {{ option.remaining }} seat{{ option.remaining != 1 ? 's' : '' }} left{% endif %}
+                                    {{ option.date|date('D, j M Y') }}{% if option.closed %} (Closed){% elseif option.remaining <= 0 %} (Fully Booked){% elseif option.remaining < 4 %} — {{ option.remaining }} seat{{ option.remaining != 1 ? 's' : '' }} left{% endif %}
                                 </option>
                             {% endfor %}
                         </select>

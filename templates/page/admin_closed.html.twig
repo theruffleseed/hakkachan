@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Time off — Hakkachan{% endblock %}
+
+{% block body %}
+    <section class="py-24 md:py-28">
+        <div class="max-w-4xl mx-auto px-6">
+            <p class="brand-mark text-xs text-brass mb-6">Admin</p>
+            <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-light mb-2 text-charcoal">Time off</h1>
+                    <p class="text-charcoal/60 text-sm">
+                        Closed dates stay visible on /reserve as “Closed” and cannot be paid for.
+                    </p>
+                </div>
+                <a href="{{ path('app_admin') }}" class="text-sm text-charcoal/60 hover:text-charcoal whitespace-nowrap mt-2">← Back to bookings</a>
+            </div>
+
+            {% for message in app.flashes('notice') %}
+                <p class="text-sm text-brass-dim mb-4">{{ message }}</p>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <p class="text-sm text-red-700 mb-4">{{ message }}</p>
+            {% endfor %}
+
+            <form method="post" action="{{ path('app_admin_closed_add') }}" data-turbo="false"
+                  class="flex flex-wrap items-end gap-4 mb-16">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+                <label class="text-sm">
+                    <span class="block mb-1 text-charcoal/70">Close a Friday or Saturday</span>
+                    <input type="date" name="date" required
+                           class="border border-charcoal/25 px-4 py-3 bg-bone">
+                </label>
+                <button type="submit" class="bg-brass text-charcoal px-8 py-3 text-sm brand-mark hover:bg-brass-dim transition-colors">
+                    Take off
+                </button>
+            </form>
+
+            <div class="overflow-x-auto mb-16">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-charcoal/45 border-b border-charcoal/10">
+                        <tr>
+                            <th class="py-3 pr-4 font-normal">Seating</th>
+                            <th class="py-3 pr-4 font-normal">Status</th>
+                            <th class="py-3 pr-4 font-normal text-right">Paid guests</th>
+                            <th class="py-3 font-normal text-right"><span class="sr-only">Action</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in dates %}
+                            <tr class="border-b border-charcoal/10 align-middle">
+                                <td class="py-4 pr-4">{{ row.date|date('l, j F Y') }}</td>
+                                <td class="py-4 pr-4">
+                                    {% if row.closed %}
+                                        <span class="text-brass-dim">Closed</span>
+                                    {% else %}
+                                        <span class="text-charcoal/70">Open</span>
+                                    {% endif %}
+                                    {% if row.closed and row.paidPax > 0 %}
+                                        <span class="block text-xs text-red-700">{{ row.paidPax }} paid guest{{ row.paidPax == 1 ? '' : 's' }} — move or refund below</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 pr-4 text-right">{{ row.paidPax }} / {{ capacity }}</td>
+                                <td class="py-4 text-right whitespace-nowrap">
+                                    {% if row.closed %}
+                                        <form method="post" action="{{ path('app_admin_closed_delete', { date: row.date|date('Y-m-d') }) }}" data-turbo="false" class="inline">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+                                            <button type="submit" class="text-brass hover:underline">Reopen</button>
+                                        </form>
+                                    {% else %}
+                                        <form method="post" action="{{ path('app_admin_closed_add') }}" data-turbo="false" class="inline">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+                                            <input type="hidden" name="date" value="{{ row.date|date('Y-m-d') }}">
+                                            <button type="submit" class="text-brass hover:underline">Take off</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if futureClosed is not empty %}
+                <h2 class="text-2xl font-light text-charcoal mb-4">Closed dates</h2>
+                <ul class="text-sm">
+                    {% for closed in futureClosed %}
+                        <li class="flex items-center justify-between gap-4 border-b border-charcoal/10 py-3">
+                            <span>{{ closed.seatingDate|date('l, j F Y') }}</span>
+                            <form method="post" action="{{ path('app_admin_closed_delete', { date: closed.seatingDate|date('Y-m-d') }) }}" data-turbo="false" class="inline">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+                                <button type="submit" class="text-brass hover:underline">Reopen</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}
