@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\MenuItemRepository;
 use App\Reservation\Pricing;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,10 +11,11 @@ use Symfony\Component\Routing\Attribute\Route;
 class PageController extends AbstractController
 {
     #[Route('/', name: 'app_home')]
-    public function home(): Response
+    public function home(MenuItemRepository $menu): Response
     {
         return $this->render('page/home.html.twig', [
             'pricePerPax' => Pricing::PRICE_PER_PAX_CENTS / 100,
+            'dishes' => $menu->findAllOrdered(),
         ]);
     }
 

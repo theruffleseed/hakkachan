@@ -66,12 +66,9 @@
             <div class="border border-white/10 p-8 md:p-10 text-center">
                 <p class="brand-mark text-xs text-brass mb-4">The Menu</p>
                 <ul class="space-y-3 font-serif text-lg font-light text-bone-dim">
-                    <li>Spiced Beef Suet, Grilled with Pineapple</li>
-                    <li>Hakka Pasta with Luicha Pesto</li>
-                    <li>Cabbage Wallet with Porky Paste</li>
-                    <li>Pasture-Raised Chicken, Tipsy Hakka Style</li>
-                    <li>Slow Roasted Pork Collar with Sun-Dried Bokchoy</li>
-                    <li>Sweet Potato Tongshui</li>
+                    {% for dish in dishes %}
+                        <li>{{ dish.name }}</li>
+                    {% endfor %}
                 </ul>
                 <p class="text-sm text-bone-dim/60 mt-6">Served in no particular order &mdash; dessert always last.</p>
             </div>

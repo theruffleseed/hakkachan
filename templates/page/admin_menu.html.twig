@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Menu — Hakkachan{% endblock %}
+
+{% block body %}
+    <section class="py-24 md:py-28">
+        <div class="max-w-4xl mx-auto px-6">
+            <p class="brand-mark text-xs text-brass mb-6">Admin</p>
+            <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-light mb-2 text-charcoal">Menu</h1>
+                    <p class="text-charcoal/60 text-sm">
+                        Dishes show on the homepage in this order, top first.
+                    </p>
+                </div>
+                <a href="{{ path('app_admin') }}" class="text-sm text-charcoal/60 hover:text-charcoal whitespace-nowrap mt-2">← Back to bookings</a>
+            </div>
+
+            {% for message in app.flashes('notice') %}
+                <p class="text-sm text-brass-dim mb-4">{{ message }}</p>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <p class="text-sm text-red-700 mb-4">{{ message }}</p>
+            {% endfor %}
+
+            <form method="post" action="{{ path('app_admin_menu_add') }}" data-turbo="false"
+                  class="flex flex-wrap items-end gap-4 mb-16">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+                <label class="text-sm grow min-w-52">
+                    <span class="block mb-1 text-charcoal/70">New dish</span>
+                    <input type="text" name="name" required maxlength="255" placeholder="e.g. Hakka Abacus Seeds"
+                           class="w-full border border-charcoal/25 px-4 py-3 bg-bone">
+                </label>
+                <button type="submit" class="bg-brass text-charcoal px-8 py-3 text-sm brand-mark hover:bg-brass-dim transition-colors">
+                    Add dish
+                </button>
+            </form>
+
+            {% if dishes is empty %}
+                <p class="text-charcoal/70">No dishes yet — the homepage menu is empty. Add the first one above.</p>
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-charcoal/45 border-b border-charcoal/10">
+                            <tr>
+                                <th class="py-3 pr-4 font-normal w-10">#</th>
+                                <th class="py-3 pr-4 font-normal">Dish</th>
+                                <th class="py-3 font-normal text-right"><span class="sr-only">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dish in dishes %}
+                                <tr class="border-b border-charcoal/10 align-middle">
+                                    <td class="py-4 pr-4 text-charcoal/45">{{ loop.index }}</td>
+                                    <td class="py-4 pr-4">
+                                        <form method="post" action="{{ path('app_admin_menu_rename', { id: dish.id }) }}" data-turbo="false"
+                                              class="flex flex-wrap items-center gap-2">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+                                            <input type="text" name="name" required maxlength="255" value="{{ dish.name }}"
+                                                   class="grow min-w-48 border border-charcoal/25 px-3 py-2 bg-bone">
+                                            <button type="submit" class="text-brass hover:underline whitespace-nowrap">Save</button>
+                                        </form>
+                                    </td>
+                                    <td class="py-4 text-right whitespace-nowrap">
+                                        <form method="post" action="{{ path('app_admin_menu_move', { id: dish.id }) }}" data-turbo="false" class="inline">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+                                            <input type="hidden" name="direction" value="up">
+                                            <button type="submit" class="text-charcoal/50 hover:text-charcoal px-1" aria-label="Move {{ dish.name }} up" {% if loop.first %}disabled class="opacity-30"{% endif %}>↑</button>
+                                        </form>
+                                        <form method="post" action="{{ path('app_admin_menu_move', { id: dish.id }) }}" data-turbo="false" class="inline">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+                                            <input type="hidden" name="direction" value="down">
+                                            <button type="submit" class="text-charcoal/50 hover:text-charcoal px-1" aria-label="Move {{ dish.name }} down" {% if loop.last %}disabled class="opacity-30"{% endif %}>↓</button>
+                                        </form>
+                                        <form method="post" action="{{ path('app_admin_menu_delete', { id: dish.id }) }}" data-turbo="false" class="inline ml-2"
+                                              onsubmit="return confirm('Remove “{{ dish.name|e('js') }}” from the menu?')">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('admin') }}">
+                                            <button type="submit" class="text-red-700 hover:underline">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

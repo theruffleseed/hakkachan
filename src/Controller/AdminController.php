@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\ClosedDate;
+use App\Entity\MenuItem;
 use App\Entity\Reservation;
 use App\Repository\ClosedDateRepository;
+use App\Repository\MenuItemRepository;
 use App\Reservation\GuestDetails;
 use App\Reservation\Pricing;
 use App\Reservation\ReservationNotifier;
@@ -21,6 +23,7 @@ class AdminController extends AbstractController
     public function __construct(
         private readonly ReservationRepository $reservations,
         private readonly ClosedDateRepository $closedDates,
+        private readonly MenuItemRepository $menu,
         private readonly EntityManagerInterface $em,
         private readonly ReservationNotifier $notifier,
     ) {
@@ -246,5 +249,91 @@ class AdminController extends AbstractController
         }
 
         return $this->redirectToRoute('app_admin_closed');
+    }
+
+    #[Route('/admin/menu', name: 'app_admin_menu', methods: ['GET'])]
+    public function menu(): Response
+    {
+        return $this->render('page/admin_menu.html.twig', [
+            'dishes' => $this->menu->findAllOrdered(),
+        ]);
+    }
+
+    #[Route('/admin/menu', name: 'app_admin_menu_add', methods: ['POST'])]
+    public function addDish(Request $request): Response
+    {
+        $this->isCsrfTokenValid('admin', $request->request->get('_csrf_token'))
+            or throw $this->createAccessDeniedException('Invalid CSRF token.');
+
+        $name = trim((string) $request->request->get('name'));
+        if ('' === $name || 255 < \strlen($name)) {
+            $this->addFlash('error', 'Give the dish a name (up to 255 characters).');
+
+            return $this->redirectToRoute('app_admin_menu');
+        }
+
+        $this->em->persist(new MenuItem($name, $this->menu->nextPosition()));
+        $this->em->flush();
+        $this->addFlash('notice', sprintf('Added “%s”.', $name));
+
+        return $this->redirectToRoute('app_admin_menu');
+    }
+
+    #[Route('/admin/menu/{id}/rename', name: 'app_admin_menu_rename', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function renameDish(Request $request, MenuItem $dish): Response
+    {
+        $this->isCsrfTokenValid('admin', $request->request->get('_csrf_token'))
+            or throw $this->createAccessDeniedException('Invalid CSRF token.');
+
+        $name = trim((string) $request->request->get('name'));
+        if ('' === $name || 255 < \strlen($name)) {
+            $this->addFlash('error', 'Give the dish a name (up to 255 characters).');
+
+            return $this->redirectToRoute('app_admin_menu');
+        }
+
+        $dish->setName($name);
+        $this->em->flush();
+        $this->addFlash('notice', sprintf('Renamed to “%s”.', $name));
+
+        return $this->redirectToRoute('app_admin_menu');
+    }
+
+    #[Route('/admin/menu/{id}/delete', name: 'app_admin_menu_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function deleteDish(Request $request, MenuItem $dish): Response
+    {
+        $this->isCsrfTokenValid('admin', $request->request->get('_csrf_token'))
+            or throw $this->createAccessDeniedException('Invalid CSRF token.');
+
+        $name = $dish->getName();
+        $this->em->remove($dish);
+        $this->em->flush();
+        $this->addFlash('notice', sprintf('Removed “%s”.', $name));
+
+        return $this->redirectToRoute('app_admin_menu');
+    }
+
+    #[Route('/admin/menu/{id}/move', name: 'app_admin_menu_move', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function moveDish(Request $request, MenuItem $dish): Response
+    {
+        $this->isCsrfTokenValid('admin', $request->request->get('_csrf_token'))
+            or throw $this->createAccessDeniedException('Invalid CSRF token.');
+
+        $direction = 'down' === $request->request->get('direction') ? 1 : -1;
+        $dishes = $this->menu->findAllOrdered();
+        foreach ($dishes as $i => $other) {
+            if ($other->getId() === $dish->getId()) {
+                $neighbour = $dishes[$i + $direction] ?? null;
+                if ($neighbour) {
+                    $position = $dish->getPosition();
+                    $dish->setPosition($neighbour->getPosition());
+                    $neighbour->setPosition($position);
+                    $this->em->flush();
+                }
+                break;
+            }
+        }
+
+        return $this->redirectToRoute('app_admin_menu');
     }
 }
