@@ -5,6 +5,8 @@ namespace App\Tests\Reservation;
 use App\Entity\Reservation;
 use App\Reservation\ReservationNotifier;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 
 /**
  * A paid booking mails twice: one alert to the restaurant, one confirmation
@@ -50,5 +52,29 @@ final class ReservationNotifierTest extends WebTestCase
         $notifier->notifyGuest($booking, 'Admin — cash/transfer');
 
         self::assertEmailCount(1);
+    }
+
+    public function testCommaSeparatedNotifyEmailsMailEveryInbox(): void
+    {
+        self::createClient();
+        $notifier = new ReservationNotifier(
+            'admin@example.com,alerts@example.com',
+            self::getContainer()->get(MailerInterface::class),
+        );
+
+        $booking = new Reservation(
+            new \DateTimeImmutable('2026-08-07'),
+            2,
+            2 * 19800,
+            'Wei Ling',
+            '0123456789',
+            'wei@example.com',
+        );
+
+        $notifier->notify($booking, 'Admin — cash/transfer');
+
+        self::assertEmailCount(1);
+        $to = array_map(static fn (Address $a): string => $a->getAddress(), self::getMailerMessage(0)->getTo());
+        self::assertSame(['admin@example.com', 'alerts@example.com'], $to);
     }
 }

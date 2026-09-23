@@ -5,6 +5,7 @@ namespace App\Reservation;
 use App\Entity\Reservation;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
 /**
@@ -15,6 +16,10 @@ use Symfony\Component\Mime\Email;
  * Both are skipped when RESERVATION_NOTIFY_EMAIL is unset (no sender).
  * The guest mail is additionally skipped when the booking has no address —
  * only possible for rows created before email became mandatory.
+ *
+ * RESERVATION_NOTIFY_EMAIL may be comma-separated for several alert
+ * inboxes. The first address is always the sender — keep it first so the
+ * From header matches the SMTP account the mail goes out as.
  */
 final readonly class ReservationNotifier
 {
@@ -25,15 +30,35 @@ final readonly class ReservationNotifier
     ) {
     }
 
+    /** @return list<Address> */
+    private function notifyRecipients(): array
+    {
+        $addresses = [];
+        foreach (explode(',', $this->notifyEmail) as $part) {
+            $part = trim($part);
+            if ($part !== '') {
+                $addresses[] = Address::create($part);
+            }
+        }
+
+        return $addresses;
+    }
+
+    private function sender(): ?Address
+    {
+        return $this->notifyRecipients()[0] ?? null;
+    }
+
     public function notify(Reservation $reservation, string $source): void
     {
-        if ($this->notifyEmail === '') {
+        $recipients = $this->notifyRecipients();
+        if ($recipients === []) {
             return;
         }
 
         $this->mailer->send((new Email())
-            ->from($this->notifyEmail)
-            ->to($this->notifyEmail)
+            ->from($recipients[0])
+            ->to(...$recipients)
             ->subject(\sprintf(
                 'New reservation: %s — %s, %d pax',
                 $reservation->getGuestName() ?? 'unknown',
@@ -55,12 +80,12 @@ final readonly class ReservationNotifier
     public function notifyGuest(Reservation $reservation, string $source): void
     {
         $guestEmail = $reservation->getGuestEmail();
-        if ('' === $this->notifyEmail || null === $guestEmail || '' === $guestEmail) {
+        if (null === $this->sender() || null === $guestEmail || '' === $guestEmail) {
             return;
         }
 
         $this->mailer->send((new Email())
-            ->from($this->notifyEmail)
+            ->from($this->sender())
             ->to($guestEmail)
             ->subject(\sprintf(
                 'Your Hakkachan reservation — %s, %d pax',
