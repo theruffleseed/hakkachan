@@ -39,13 +39,14 @@ class AdminCreateTest extends WebTestCase
             '_csrf_token' => $token,
             'name' => 'Cash Guest',
             'phone' => '0123456789',
-            'email' => '',
+            'email' => 'cash.guest@example.com',
             'date' => '2026-08-07',
             'pax' => 4,
         ]);
 
         self::assertResponseRedirects('/admin');
-        self::assertQueuedEmailCount(1);
+        // One alert to the restaurant plus one confirmation to the guest.
+        self::assertEmailCount(2);
 
         $booking = $this->em->getRepository(Reservation::class)->findOneBy(['guestName' => 'Cash Guest']);
         self::assertNotNull($booking);
@@ -66,13 +67,13 @@ class AdminCreateTest extends WebTestCase
             '_csrf_token' => $token,
             'name' => 'Overflow Guest',
             'phone' => '',
-            'email' => '',
+            'email' => 'overflow.guest@example.com',
             'date' => '2026-08-07',
             'pax' => 4,
         ]);
 
         self::assertResponseRedirects('/admin/new');
-        self::assertQueuedEmailCount(0);
+        self::assertEmailCount(0);
         self::assertNull($this->em->getRepository(Reservation::class)->findOneBy(['guestName' => 'Overflow Guest']));
     }
 

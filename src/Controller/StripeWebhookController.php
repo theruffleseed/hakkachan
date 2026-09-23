@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Reservation\GuestDetails;
 use App\Reservation\ReservationNotifier;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -48,10 +49,25 @@ class StripeWebhookController extends AbstractController
 
             $reservation = $this->reservations->findByStripeSessionId($session->id);
             if ($reservation && $reservation->getStatus() !== 'paid') {
+                // Rows created before email became mandatory may lack one —
+                // prefer the address Stripe actually charged.
+                $stripeEmail = $session->customer_details?->email;
+                if (!$reservation->getGuestEmail() && \is_string($stripeEmail) && '' !== $stripeEmail) {
+                    $guest = GuestDetails::fromInput(
+                        $reservation->getGuestName() ?? 'Guest',
+                        $reservation->getGuestPhone(),
+                        $stripeEmail,
+                    );
+                    if ($guest) {
+                        $reservation->setGuest($guest);
+                    }
+                }
+
                 $reservation->markPaid();
                 $this->em->flush();
 
                 $this->notifier->notify($reservation, 'Stripe — ' . $session->id);
+                $this->notifier->notifyGuest($reservation, 'Stripe — ' . $session->id);
             }
 
             $this->logger->info('Reservation paid', [

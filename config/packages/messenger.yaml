@@ -9,6 +9,10 @@ framework:
                 retry_strategy:
                     max_retries: 3
                     multiplier: 2
+            # Reservation emails send synchronously: this host has no worker
+            # to consume an async mail queue (see DEPLOY.md), so queued mail
+            # would sit in the database forever and guests would get nothing.
+            sync: 'sync://'
             failed: 'doctrine://default?queue_name=failed'
             # sync: 'sync://'
 
@@ -18,7 +22,7 @@ framework:
             messenger.bus.default: []
 
         routing:
-            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+            Symfony\Component\Mailer\Messenger\SendEmailMessage: sync
             Symfony\Component\Notifier\Message\ChatMessage: async
             Symfony\Component\Notifier\Message\SmsMessage: async
 

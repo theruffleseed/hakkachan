@@ -71,7 +71,7 @@ class ReservationController extends AbstractController
         );
 
         if (!$guest) {
-            $this->addFlash('error', 'Please give us your name, and a valid email address if you enter one.');
+            $this->addFlash('error', 'Please give us your name and a valid email address — your confirmation goes there.');
 
             return $this->redirectToRoute('app_reserve');
         }
@@ -120,9 +120,9 @@ class ReservationController extends AbstractController
                 ],
                 'quantity' => $pax,
             ]],
-            // Name and phone come from our own form, so Stripe only needs the card.
-            // Without an email of our own, Stripe asks for one to send the receipt.
-            ...($guest->email ? ['customer_email' => $guest->email] : []),
+            // Name and phone come from our own form; Stripe sends the receipt
+            // to the mandatory email address.
+            'customer_email' => $guest->email,
             'metadata' => ['reservation_id' => $reservation->getId()],
             'success_url' => $this->generateUrl('app_reserve_success', [], UrlGeneratorInterface::ABSOLUTE_URL) . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => $this->generateUrl('app_reserve_cancel', [], UrlGeneratorInterface::ABSOLUTE_URL),

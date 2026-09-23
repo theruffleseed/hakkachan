@@ -84,7 +84,7 @@ class AdminEditTest extends WebTestCase
             '_csrf_token' => $token,
             'name' => 'Guest',
             'phone' => '',
-            'email' => '',
+            'email' => 'guest@example.com',
             'date' => $date,
             'pax' => $pax,
         ]);

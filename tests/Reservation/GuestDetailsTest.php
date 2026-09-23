@@ -18,22 +18,22 @@ final class GuestDetailsTest extends TestCase
         self::assertSame('WEI@example.com', $guest->email);
     }
 
-    public function testAcceptsNameOnlyBecausePhoneAndEmailAreOptional(): void
+    public function testAcceptsPhoneAsOptional(): void
     {
-        $guest = GuestDetails::fromInput('Wei Ling', null, null);
+        $guest = GuestDetails::fromInput('Wei Ling', null, 'wei@example.com');
 
         self::assertNotNull($guest);
         self::assertNull($guest->phone);
-        self::assertNull($guest->email);
+        self::assertSame('wei@example.com', $guest->email);
     }
 
-    public function testTreatsBlankPhoneAndEmailAsNotGiven(): void
+    public function testTreatsBlankPhoneAsNotGiven(): void
     {
-        $guest = GuestDetails::fromInput('Wei Ling', '   ', '  ');
+        $guest = GuestDetails::fromInput('Wei Ling', '   ', 'wei@example.com');
 
         self::assertNotNull($guest);
         self::assertNull($guest->phone);
-        self::assertNull($guest->email);
+        self::assertSame('wei@example.com', $guest->email);
     }
 
     /**
@@ -43,6 +43,8 @@ final class GuestDetailsTest extends TestCase
     {
         yield 'missing name' => [null, '0123456789', 'wei@example.com'];
         yield 'blank name' => ['   ', '0123456789', 'wei@example.com'];
+        yield 'missing email' => ['Wei Ling', '0123456789', null];
+        yield 'blank email' => ['Wei Ling', '0123456789', '  '];
         yield 'malformed email' => ['Wei Ling', '0123456789', 'wei@example'];
         yield 'name too long' => [str_repeat('a', GuestDetails::MAX_NAME + 1), '0123456789', 'wei@example.com'];
         yield 'phone too long' => ['Wei Ling', str_repeat('1', GuestDetails::MAX_PHONE + 1), 'wei@example.com'];

@@ -5,6 +5,9 @@ namespace App\Reservation;
 /**
  * The guest contact details taken on the reservation form. Lengths mirror the
  * column widths on App\Entity\Reservation.
+ *
+ * Email is mandatory: every paid booking gets a confirmation email, and
+ * Stripe sends its receipt there too.
  */
 final readonly class GuestDetails
 {
@@ -15,15 +18,14 @@ final readonly class GuestDetails
     private function __construct(
         public string $name,
         public ?string $phone,
-        public ?string $email,
+        public string $email,
     ) {
     }
 
     /**
-     * Only the name is required; phone and email are optional on the form, but
-     * an email that is given has to be a real one. Returns null when the
-     * submitted details aren't usable — the caller turns that into a flash
-     * message.
+     * Name and a real email address are required; phone is optional. Returns
+     * null when the submitted details aren't usable — the caller turns that
+     * into a flash message.
      */
     public static function fromInput(?string $name, ?string $phone, ?string $email): ?self
     {
@@ -33,8 +35,8 @@ final readonly class GuestDetails
 
         $valid = $name !== '' && mb_strlen($name) <= self::MAX_NAME
             && mb_strlen($phone) <= self::MAX_PHONE
-            && ($email === '' || (mb_strlen($email) <= self::MAX_EMAIL && false !== filter_var($email, \FILTER_VALIDATE_EMAIL)));
+            && $email !== '' && mb_strlen($email) <= self::MAX_EMAIL && false !== filter_var($email, \FILTER_VALIDATE_EMAIL);
 
-        return $valid ? new self($name, $phone ?: null, $email ?: null) : null;
+        return $valid ? new self($name, $phone ?: null, $email) : null;
     }
 }

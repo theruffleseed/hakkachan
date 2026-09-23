@@ -53,7 +53,7 @@ class AdminController extends AbstractController
         $date = \DateTimeImmutable::createFromFormat('!Y-m-d', (string) $request->request->get('date')) ?: null;
 
         if (!$guest || !$date || $pax < Pricing::MIN_PAX) {
-            $this->addFlash('error', sprintf('Need a name, a valid date, and at least %d pax.', Pricing::MIN_PAX));
+            $this->addFlash('error', sprintf('Need a name, a valid email address, a valid date, and at least %d pax.', Pricing::MIN_PAX));
 
             return $this->redirectToRoute('app_admin_new');
         }
@@ -71,6 +71,7 @@ class AdminController extends AbstractController
         $this->em->flush();
 
         $this->notifier->notify($booking, 'Admin — cash/transfer');
+        $this->notifier->notifyGuest($booking, 'Admin — cash/transfer');
 
         $this->addFlash('notice', sprintf('Added %s.', $guest->name));
 
@@ -126,7 +127,7 @@ class AdminController extends AbstractController
         $date = \DateTimeImmutable::createFromFormat('!Y-m-d', (string) $request->request->get('date')) ?: null;
 
         if (!$guest || !$date || $pax < Pricing::MIN_PAX) {
-            $this->addFlash('error', sprintf('Need a name, a valid date, and at least %d pax.', Pricing::MIN_PAX));
+            $this->addFlash('error', sprintf('Need a name, a valid email address, a valid date, and at least %d pax.', Pricing::MIN_PAX));
 
             return $this->redirectToRoute('app_admin_edit', ['id' => $booking->getId()]);
         }
